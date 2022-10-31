@@ -15,5 +15,5 @@ function countAnimals(animal) {
   return getSpecie.length;
 }
 
-console.log(countAnimals());
+// console.log(countAnimals());
 module.exports = countAnimals;
