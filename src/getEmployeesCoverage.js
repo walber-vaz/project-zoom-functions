@@ -2,40 +2,39 @@ const data = require('../data/zoo_data');
 
 const { employees, species } = data;
 
-const getEmployee = (nameEmployee) => {
-  if (nameEmployee.name) {
-    return employees.find(({ firstName, lastName, id }) =>
-      [firstName, lastName].includes(nameEmployee.name || nameEmployee.id));
-  }
+const getSpecies = (name) => {
+  const employeeResponsible = name.responsibleFor;
+  const isSpecieResponsible = species.filter(({ id }) => employeeResponsible.includes(id));
 
-  if (nameEmployee.id) return employees.find(({ id }) => id === nameEmployee.id);
+  return isSpecieResponsible;
 };
 
-const confirmEmployee = (name) => {
-  const isError = getEmployee(name);
-  if (!isError) throw new Error('Informações inválidas');
-  const responsibility = species.filter((specie) => isError.responsibleFor.includes(specie.id));
+const getSpeciesName = (specie) => specie.map(({ name }) => name);
+const getSpeciesLocation = (loc) => loc.map(({ location }) => location);
+
+const getInfoEmployees = (name) => {
+  const getEmployee = employees.find(({ firstName, lastName, id }) =>
+    firstName === name || lastName === name || id === name);
+
+  if (getEmployee === undefined) throw new Error('Informações inválidas');
+
+  const getEmployeeIsResponsible = getSpecies(getEmployee);
 
   return {
-    id: isError.id,
-    fullName: `${isError.firstName} ${isError.lastName}`,
-    species: responsibility.map((specie) => specie.name),
-    locations: responsibility.map((specie) => specie.location),
+    id: getEmployee.id,
+    fullName: `${getEmployee.firstName} ${getEmployee.lastName}`,
+    species: getSpeciesName(getEmployeeIsResponsible),
+    locations: getSpeciesLocation(getEmployeeIsResponsible),
   };
 };
 
-const getEmployeesCoverage = (name) => {
-  if (!name) {
-    const arrNameResponsability = [];
-    employees.forEach((employee) => {
-      const firstNameEmployee = {
-        name: employee.firstName,
-      };
-      arrNameResponsability.push(confirmEmployee(firstNameEmployee));
-    });
-    return arrNameResponsability;
-  }
-  return confirmEmployee(name);
+const getAllEmployees = () => employees.map(({ firstName }) => getInfoEmployees(firstName));
+
+const getEmployeesCoverage = (param) => {
+  if (param === undefined) return getAllEmployees();
+  if (param.name) return getInfoEmployees(param.name);
+
+  return getInfoEmployees(param.id);
 };
 
 module.exports = getEmployeesCoverage;
